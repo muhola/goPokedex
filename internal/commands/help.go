@@ -2,8 +2,8 @@ package commands
 
 import "fmt"
 
-func commandHelp() error {
-	commands := getCommands()
+func commandHelp(config *configuration) error {
+	commands := GetCommands()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Printf("Usage: \n\n")
 

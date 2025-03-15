@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
+
+	"github.com/muhola/goPokedex/internal/commands"
 )
 
 func main() {
-	commands.initComands()
+	commands.InitComands()
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Fprint(os.Stderr, "Pokedex > ")
@@ -16,16 +17,7 @@ func main() {
 			break
 		}
 		input := scanner.Text()
-		clicmd, ok := commands.cliComands[strings.ToLower(input)]
-		if ok {
-			cmdError := clicmd.callback()
-			if cmdError != nil {
-				fmt.Errorf(cmdError.Error())
-			}
-
-		} else {
-			fmt.Println("Unknown command")
-		}
+		commands.GetCommand(input)
 
 	}
 	if err := scanner.Err(); err != nil {
