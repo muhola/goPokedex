@@ -1,8 +1,13 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
 
-func commandHelp(config *configuration) error {
+	"github.com/muhola/goPokedex/internal/cache"
+	"github.com/muhola/goPokedex/internal/pokeapi"
+)
+
+func commandHelp(config *Configuration, pokeCache *cache.Cache, pokeClient *pokeapi.Client) error {
 	commands := GetCommands()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Printf("Usage: \n\n")

@@ -3,9 +3,12 @@ package commands
 import (
 	"fmt"
 	"os"
+
+	"github.com/muhola/goPokedex/internal/cache"
+	"github.com/muhola/goPokedex/internal/pokeapi"
 )
 
-func commandExit(config *configuration) error {
+func commandExit(config *Configuration, pokeCache *cache.Cache, pokeClient *pokeapi.Client) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	defer os.Exit(0)
 	return nil

@@ -3,31 +3,23 @@ package commands
 import (
 	"fmt"
 	"strings"
+
+	"github.com/muhola/goPokedex/internal/cache"
+	"github.com/muhola/goPokedex/internal/pokeapi"
 )
 
-type cliCommand struct {
-	name        string
-	description string
-	callback    func(*configuration) error
-	config      *configuration
-}
+var sharedConfig = &Configuration{}
+var cliComands map[string]CliCommand
+var pokeCache *cache.Cache
 
-type configuration struct {
-	Next     string
-	Previous string
-}
-
-var sharedConfig = &configuration{}
-var cliComands map[string]cliCommand
-
-func GetCommands() map[string]cliCommand {
+func GetCommands() map[string]CliCommand {
 	return cliComands
 }
 
-func GetCommand(input string) {
+func GetCommand(input string, cache *cache.Cache, pokeClient *pokeapi.Client) {
 	clicmd, ok := cliComands[strings.ToLower(input)]
 	if ok {
-		cmdError := clicmd.callback(clicmd.config)
+		cmdError := clicmd.callback(clicmd.config, cache, pokeClient)
 		if cmdError != nil {
 			fmt.Errorf(cmdError.Error())
 		}
@@ -40,7 +32,7 @@ func GetCommand(input string) {
 
 func InitComands() {
 
-	cliComands = map[string]cliCommand{
+	cliComands = map[string]CliCommand{
 		"help": {
 			name:        "help",
 			description: " Display a help message",

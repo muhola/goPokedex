@@ -3,19 +3,24 @@ package commands
 import (
 	"fmt"
 
+	"github.com/muhola/goPokedex/internal/cache"
 	"github.com/muhola/goPokedex/internal/pokeapi"
 )
 
-func commandMap(configuration *configuration) error {
+func commandMap(configuration *Configuration, pokeCache *cache.Cache, pokeClient *pokeapi.Client) error {
 	url := ""
+
 	if configuration.Next != "" {
 		url = configuration.Next
 	}
-	locations := pokeapi.GetLocation(url)
+	locations := pokeClient.GetLocation(url, pokeCache)
 	if locations.Next != "<nil>" {
 		configuration.Next = locations.Next
-
 	}
+	if locations.Previous != "<nil>" {
+		configuration.Previous = locations.Previous
+	}
+
 	for _, location := range locations.Results {
 		fmt.Println(location.Name)
 	}
