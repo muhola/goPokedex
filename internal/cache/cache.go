@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -38,7 +37,7 @@ func (c *Cache) reapLoop(interval time.Duration) {
 		for key, entery := range c.data {
 			if time.Since(entery.createdAt) > interval {
 				delete(c.data, key)
-				fmt.Println("Cache expeired ", key)
+				//fmt.Println("Cache expeired ", key)
 			}
 		}
 		c.mu.Unlock()

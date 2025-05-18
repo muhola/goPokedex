@@ -4,14 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/muhola/goPokedex/internal/cache"
 )
-
-const baseLocationUrl = "https://pokeapi.co/api/v2/location-area/"
 
 func NewClient() *Client {
 	return &Client{
@@ -20,38 +18,88 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) GetLocation(url string, pokeCache *cache.Cache) LocationArea {
-	var pokeLocation LocationArea
+// fetchAndUnmarshal retrieves data from cache or API and unmarshals it
+func (c *Client) fetchAndUnmarshal(url string, pokeCache *cache.Cache, result interface{}) error {
+	// Check cache first
 	cachedData, found := pokeCache.Get(url)
-	fmt.Println(url)
 	if found {
-		fmt.Println("Cache Data found")
-		err := json.Unmarshal(cachedData, &pokeLocation)
+		err := json.Unmarshal(cachedData, result)
 		if err != nil {
-			log.Fatalf("Error unmarshalling JSON: %v", err)
+			return fmt.Errorf("unmarshalling JSON from cache: %w", err)
 		}
-		return pokeLocation
+		return nil
 	}
 
-	if url == "" {
-		url = c.BaseURL + "location-area/"
-	}
-	fmt.Println("Make Request")
+	// Fetch from API if not in cache
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("HTTP GET request: %w", err)
 	}
 	defer resp.Body.Close()
 
+	// Read response body
 	body, err := io.ReadAll(resp.Body)
-	pokeCache.Add(url, body)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("reading response body: %w", err)
 	}
 
-	if err := json.Unmarshal(body, &pokeLocation); err != nil {
-		log.Fatalf("Error unmarshalling JSON: %v", err)
+	// Add to cache
+	pokeCache.Add(url, body)
+
+	// Unmarshal the JSON
+	if err := json.Unmarshal(body, result); err != nil {
+		return fmt.Errorf("unmarshalling JSON from API: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Client) GetLocation(url string, pokeCache *cache.Cache) LocationArea {
+	if url == "" {
+		url = c.BaseURL + "location/"
+	}
+	var pokeLocation LocationArea
+	err := c.fetchAndUnmarshal(url, pokeCache, &pokeLocation)
+
+	if err != nil {
+		fmt.Println("Can not find location")
 	}
 
 	return pokeLocation
+}
+
+func (c *Client) GetPokemonBasedOnLocation(parameter string, pokeCache *cache.Cache) PokemonLocationEncounters {
+	var pokemonfromLocation PokemonLocationEncounters
+	if parameter == "" {
+		return pokemonfromLocation
+	}
+	//cheack if user cityies in without -area prefex
+	if !strings.Contains(parameter, "-area") {
+		parameter += "-area"
+	}
+	url := c.BaseURL + "location-area/" + parameter
+
+	err := c.fetchAndUnmarshal(url, pokeCache, &pokemonfromLocation)
+
+	if err != nil {
+		fmt.Println("Can not find location")
+	}
+
+	return pokemonfromLocation
+}
+
+func (c *Client) GetPokemon(parameter string, pokeCache *cache.Cache) Pokemon {
+	var pokemon Pokemon
+	if parameter == "" {
+		return pokemon
+	}
+
+	url := c.BaseURL + "pokemon/" + parameter
+	err := c.fetchAndUnmarshal(url, pokeCache, &pokemon)
+
+	if err != nil {
+		fmt.Printf("Can not find %s /n", parameter)
+	}
+
+	return pokemon
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/muhola/goPokedex/internal/pokeapi"
 )
 
-func commandMapb(configuration *Configuration, pokeCache *cache.Cache, pokeClient *pokeapi.Client) error {
+func commandMapb(configuration *Configuration, pokeCache *cache.Cache, pokeClient *pokeapi.Client, parameter string, pokedex map[string]pokeapi.Pokemon) error {
 	url := ""
 	if configuration.Previous != "" {
 		url = configuration.Previous

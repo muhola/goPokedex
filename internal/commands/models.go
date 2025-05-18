@@ -8,7 +8,7 @@ import (
 type CliCommand struct {
 	name        string
 	description string
-	callback    func(*Configuration, *cache.Cache, *pokeapi.Client) error
+	callback    func(*Configuration, *cache.Cache, *pokeapi.Client, string, map[string]pokeapi.Pokemon) error
 	config      *Configuration
 }
 
