@@ -53,7 +53,6 @@ type Pokemon struct {
 			URL  string `json:"url"`
 		} `json:"version"`
 	} `json:"game_indices"`
-	int       `json:"height"`
 	HeldItems []struct {
 		Item struct {
 			Name string `json:"name"`
